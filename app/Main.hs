@@ -25,7 +25,7 @@ main = do
 			content <- readFile input_fp
 			let binary = assemble content
 			writeFile output_fp binary
-		_ -> putStrLn "Usage: HackAssembler_hs <input.asm> <output.hack>"
+		_ -> putStrLn "Usage: HackAssembler-hs <input.asm> <output.hack>"
 
 -------------------------------------------------------------------------------------
 ----------------------------------- ASSEMBLER ---------------------------------------
@@ -96,7 +96,6 @@ extractLabels (pc, st) (_, line@(x:_))
 safeInit :: [a] -> Maybe [a]
 safeInit [] = Nothing
 safeInit xs = Just (init xs)
--- TODO: look up the keywords Nothing and Just
 
 -------------------------------------------------------------------------------------
 ----------------------------------- SECOND PASS -------------------------------------
@@ -116,13 +115,11 @@ translateLine (symTbl, i, outLines) (x:xs)
 -------------------------------------------------------------------------------------
 
 aInstruction :: (Map String Integer, Integer, [String]) -> String -> (Map String Integer, Integer, [String])
-aInstruction (symTbl, i, outLines) s -- = -- (symTbl, i, outLines ++ [binaryRep s])
+aInstruction (symTbl, i, outLines) s
     | all isDigit s = (symTbl, i, outLines ++ ['0' : binaryRep s]) -- no variable
     | otherwise     = case Map.lookup s symTbl of
-                        Just address -> (symTbl, i, outLines ++ ['0' : binaryRep (show address)]) -- 
+                        Just address -> (symTbl, i, outLines ++ ['0' : binaryRep (show address)])
                         Nothing -> (Map.insert s i symTbl, i+1, outLines ++ ['0' : binaryRep (show i)]) -- add it to the symbol table
-
-    -- (symTbl, i, outLines) -- placeholder, handle symbols later
 
 binaryRep :: String -> String
 binaryRep s = padded
@@ -217,34 +214,3 @@ assembleJump s
 	| s == "JMP" = "111"
 	| otherwise = error ("Invalid Jump: " ++ s ++ ".")
 
-
-
-
-
-
-
--- dest = comp; jump
-
---parseComp :: String -> String
---parseComp s =
---	case (split (== ';') (split (== '=') s)) of
---		[d,c,j] -> c
---		-- what other cases?
---data CInstruction = Dest String Cond String Jump String
-
--- THIS WORKS SO FAR
---
--- NOW I'VE JSUT GOT TO ACTUALLY WRITE AN ASSEMBLER
---
--- USE lines x to seperate the string into lines (splits on \n)
--- the parse each line
--- this is instructions, do it the haskell way (maps)
---
--- so second pass is mapping a string to the binary string
--- do this using a map (this map will take a symbolTable and a string as input) on each line
---
--- HOW DO I CREATE THE SYMBOL TABLE?
--- DO I STILL NEED TO DO TWO PASSES?
-
--- so i want a symbol table
--- main will open the file, read it, send it to the assembler, then output the result to another file
